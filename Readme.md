@@ -71,16 +71,6 @@ In a complete system, this platform reduces load on main APIs, enables scalabili
 - Redis (for queuing; in-memory for development)
 - Docker (for containerization)
 
-## Configuration & Secrets
-
-**⚠️ Important:** Never commit sensitive data to version control. This project uses:
-
-- **User Secrets** (`dotnet user-secrets`) for local development - stored securely outside the repo
-- **Environment Variables** for production deployments
-- **appsettings.json.example** - template showing the required configuration structure
-
-See the Setup section below for how to configure your local environment.
-
 ## Setup
 
 1. **Clone the repository:**
@@ -120,18 +110,3 @@ See the Setup section below for how to configure your local environment.
 2. Send test webhooks to `/webhook/incoming` (use tools like Postman or curl)
 
 3. Monitor background processing and stored results via logs or database queries
-
-## Learning Goals
-
-This project helps build skills in:
-
-- System design and architecture.
-- Asynchronous programming and queuing.
-- Dependency injection and clean code.
-- Testing and deployment.
-
-## Future Enhancements
-
-- Real payment gateway integration.
-- Idempotency and error handling.
-- Dashboard for monitoring.
