@@ -1,7 +1,7 @@
 using System;
 using webhook_processing_platform.Application.Dtos;
 
-namespace webhook_processing_platform.Application.Handlers;
+namespace webhook_processing_platform.Application.Interfaces;
 
 public interface IIncomingEventHandler
 {

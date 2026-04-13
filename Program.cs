@@ -1,8 +1,9 @@
 using webhook_processing_platform.Application.Handlers;
 using webhook_processing_platform.Application.Mappers;
-using webhook_processing_platform.Application.Repositories;
+using webhook_processing_platform.Application.Interfaces;
 using webhook_processing_platform.Infrastructure.Repositories;
 using webhook_processing_platform.Infrastructure.Validators;
+using webhook_processing_platform.Infrastructure.Queues;
 using System.Data;
 using Npgsql;
 using System.Net;
@@ -53,8 +54,14 @@ builder.Services.AddScoped<IDbConnection>(sp =>
 // Register repositories
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
+// Register queue (in-memory for development, Redis for production)
+builder.Services.AddSingleton<IWebhookQueue, InMemoryWebhookQueue>();
+
 // Register handlers
 builder.Services.AddScoped<IIncomingEventHandler, IncomingEventHandler>();
+
+// Register background service for processing queued webhooks
+builder.Services.AddHostedService<WebhookProcessingBackgroundService>();
 
 // Register mappers
 builder.Services.AddScoped<IncomingEventToPaymentMapper>();

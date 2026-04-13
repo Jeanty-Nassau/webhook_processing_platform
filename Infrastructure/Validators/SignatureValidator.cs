@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using webhook_processing_platform.Application.Interfaces;
 
 namespace webhook_processing_platform.Infrastructure.Validators;
 
@@ -20,11 +21,6 @@ public class SignatureValidator : ISignatureValidator
     using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_secret));
     var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(payload));
     var computed = "sha256=" + BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-
-    // Temp debugging log: show what the validator computed compared to incoming.
-    Console.WriteLine($"[DEBUG SignatureValidator] incomingSignature={signature}");
-    Console.WriteLine($"[DEBUG SignatureValidator] computedSignature={computed}");
-    Console.WriteLine($"[DEBUG SignatureValidator] payloadLength={payload.Length}, payloadRaw={payload}");
 
     return CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(computed), Encoding.UTF8.GetBytes(signature));
   }

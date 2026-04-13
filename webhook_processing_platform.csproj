@@ -17,12 +17,10 @@
   <ItemGroup>
     <Folder Include="Api/" />
     <Folder Include="Api/Controllers/" />
-    <Folder Include="Application/" />
     <Folder Include="Application/Dtos/" />
     <Folder Include="Application/Dtos/Enums/" />
     <Folder Include="Application/Handlers/" />
     <Folder Include="Application/Mappers/" />
-    <Folder Include="Application/BackgroundServices/" />
     <Folder Include="Domain/" />
     <Folder Include="Domain/Models/" />
     <Folder Include="Infrastructure/Repositories/" />

@@ -1,7 +1,7 @@
 using System.Data;
 using Dapper;
 using Npgsql;
-using webhook_processing_platform.Application.Repositories;
+using webhook_processing_platform.Application.Interfaces;
 using webhook_processing_platform.Domain.Models;
 
 namespace webhook_processing_platform.Infrastructure.Repositories;

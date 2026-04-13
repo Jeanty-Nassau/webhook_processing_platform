@@ -1,6 +1,6 @@
 using webhook_processing_platform.Application.Dtos;
+using webhook_processing_platform.Application.Interfaces;
 using webhook_processing_platform.Application.Mappers;
-using webhook_processing_platform.Application.Repositories;
 using webhook_processing_platform.Domain.Models;
 
 namespace webhook_processing_platform.Application.Handlers;

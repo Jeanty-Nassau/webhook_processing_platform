@@ -1,12 +1,10 @@
-using System.IO;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using webhook_processing_platform.Application.Dtos;
-using webhook_processing_platform.Application.Handlers;
 using webhook_processing_platform.Domain.Models;
-using webhook_processing_platform.Infrastructure.Validators;
+using webhook_processing_platform.Application.Interfaces;
 
 namespace webhook_processing_platform.Api.Controllers
 {
@@ -15,13 +13,13 @@ namespace webhook_processing_platform.Api.Controllers
     public class WebhookController : ControllerBase
     {
         private readonly ISignatureValidator _signatureValidator;
-        private readonly IIncomingEventHandler _incomingEventHandler;
+        private readonly IWebhookQueue _webhookQueue;
         private readonly ILogger<WebhookController> _logger;
 
-        public WebhookController(ISignatureValidator signatureValidator, IIncomingEventHandler incomingEventHandler, ILogger<WebhookController> logger)
+        public WebhookController(ISignatureValidator signatureValidator, IWebhookQueue webhookQueue, ILogger<WebhookController> logger)
         {
             _signatureValidator = signatureValidator;
-            _incomingEventHandler = incomingEventHandler;
+            _webhookQueue = webhookQueue;
             _logger = logger;
         }
 
@@ -33,7 +31,6 @@ namespace webhook_processing_platform.Api.Controllers
             var payload = await reader.ReadToEndAsync();
 
             _logger.LogInformation("Webhook Incoming raw payload: {Payload}", payload);
-            _logger.LogInformation("Webhook Incoming X-Signature header: {Signature}", signature);
 
             if (string.IsNullOrWhiteSpace(payload))
                 return BadRequest("Invalid event data");
@@ -48,9 +45,20 @@ namespace webhook_processing_platform.Api.Controllers
                 if (incomingMessage == null)
                     return BadRequest("Invalid event data");
 
-                await _incomingEventHandler.HandleEventAsync(incomingMessage);
-                _logger.LogInformation("Successfully processed incoming webhook event. EventType={EventType}, Source={Source}", incomingMessage.EventType, incomingMessage.Source);
-                return Ok("Incoming event processed successfully");
+                // Validate the deserialized message
+                var validationContext = new ValidationContext(incomingMessage, null, null);
+                var validationResults = new List<ValidationResult>();
+                if (!Validator.TryValidateObject(incomingMessage, validationContext, validationResults, validateAllProperties: true))
+                {
+                    var errorMessages = string.Join("; ", validationResults.Select(v => v.ErrorMessage));
+                    _logger.LogWarning("Validation failed for webhook event: {Errors}", errorMessages);
+                    return BadRequest($"Validation failed: {errorMessages}");
+                }
+
+                // Queue the event for asynchronous processing
+                await _webhookQueue.EnqueueAsync(incomingMessage);
+                _logger.LogInformation("Successfully queued incoming webhook event. EventType={EventType}, Source={Source}", incomingMessage.EventType, incomingMessage.Source);
+                return Accepted("Webhook event queued for processing");
             }
             catch (JsonException jex)
             {
@@ -72,7 +80,6 @@ namespace webhook_processing_platform.Api.Controllers
                 _logger.LogError(ex, "Unhandled exception processing webhook");
                 return StatusCode(500, "Internal server error");
             }
-
         }
     }
 }

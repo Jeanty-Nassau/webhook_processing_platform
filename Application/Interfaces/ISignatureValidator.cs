@@ -1,4 +1,4 @@
-namespace webhook_processing_platform.Infrastructure.Validators;
+namespace webhook_processing_platform.Application.Interfaces;
 
 public interface ISignatureValidator
 {
